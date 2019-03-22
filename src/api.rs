@@ -103,12 +103,6 @@ impl Smite {
         timestamp = ts,
       );
 
-      // let motd: String = reqwest::Client::new()
-      //   .get(&url)
-      //   .send()?
-      //   .text()?;
-      // println!("{}", motd);
-
       let motd: Motd = reqwest::Client::new()
         .get(&url)
         .send()?
