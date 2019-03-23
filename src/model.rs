@@ -1,6 +1,6 @@
 use std::error::Error;
 
-use crate::models::Motds;
+use crate::types;
 
 #[derive(Debug)]
 pub enum Attr {
@@ -9,21 +9,21 @@ pub enum Attr {
 }
 
 #[derive(Debug, Default)]
-pub struct Motd {
+pub struct Model {
   pub game_mode: String,
   pub title: String,
   pub attributes: Vec<Attr>,
   pub description: String,
 }
 
-pub fn parse(m: Motds) -> Result<Motd, Box<Error>> {
+pub fn parse(g: types::Gods, m: types::Motds) -> Result<Model, Box<Error>> {
   if m.len() == 0 {
     return Err("no motds".into());
   }
 
   let m = &m[0];
 
-  let mut motd = Motd::default();
+  let mut model = Model::default();
   let mut description = String::new();
   let mut attributes = vec![];
 
@@ -53,7 +53,7 @@ pub fn parse(m: Motds) -> Result<Motd, Box<Error>> {
     description.push_str(s.trim());
   }
 
-  Ok(Motd {
+  Ok(Model {
     game_mode: m.game_mode.clone().unwrap_or("".to_string()),
     title: m.title.clone().unwrap_or("".to_string()),
     attributes: attributes,
