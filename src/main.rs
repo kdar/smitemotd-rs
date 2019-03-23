@@ -1,7 +1,6 @@
 use std::error::Error;
 
 use env_logger;
-use serde_json;
 
 use crate::notify::Notify;
 
@@ -42,11 +41,9 @@ fn main() -> Result<(), Box<Error>> {
   //   "team1GodsCSV": "1956, 2056, 1668, 2034, 1898, 1748, 2037, 1809, 1678, 2008, 1966, 1921, 2075, 1784, 1978, 1763, 1848, 1673, 1677, 1993, 2051, 1915, 1872, 1958, 2000, 2113, 2065, 1988, 2005, 1747, 2030, 1924, 1991, 1723, 1864, 2072, 1926"
   // }]"#;
 
-  // let motds: models::Motd = serde_json::from_str(motds)?;
+  // let motds: types::Motds = serde_json::from_str(motds)?;
 
   let model = model::parse(gods, motds)?;
-  // // println!("{:#?}", motd);
-
   let slack = notify::slack::Slack::new(env!("SLACK_HOOK"));
   slack.notify(model)?;
 
