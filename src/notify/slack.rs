@@ -24,7 +24,7 @@ impl super::Notify for Slack {
       Field {
         title: "Game mode".to_string(),
         value: m.game_mode.clone().into(),
-        short: Some(false),
+        short: Some(true),
       }
     ];
 
@@ -33,12 +33,12 @@ impl super::Notify for Slack {
         model::Attr::KeyValue(key, value) => Field {
           title: key.to_string(),
           value: value.as_str().into(),
-          short: Some(false),
+          short: Some(true),
         },
         model::Attr::Key(key) => Field {
           title: key.to_string(),
           value: "".into(),
-          short: Some(false),
+          short: Some(true),
         }
       }
     }));
@@ -49,7 +49,7 @@ impl super::Notify for Slack {
       fields.push(Field {
         title: "Team 1 and 2".to_string(),
         value: v.collect::<Vec<_>>().join(", ").into(),
-        short: Some(false),
+        short: Some(true),
       });
     }
 
@@ -59,7 +59,7 @@ impl super::Notify for Slack {
       fields.push(Field {
         title: "Team 1 only".to_string(),
         value: v.collect::<Vec<_>>().join(", ").into(),
-        short: Some(false),
+        short: Some(true),
       });
     }
 
@@ -69,7 +69,7 @@ impl super::Notify for Slack {
       fields.push(Field {
         title: "Team 2 only".to_string(),
         value: v.collect::<Vec<_>>().join(", ").into(),
-        short: Some(false),
+        short: Some(true),
       });
     }
 
