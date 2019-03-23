@@ -107,8 +107,6 @@ impl super::Notify for Slack {
       fields: fields,
     }];
 
-    println!("{}", serde_json::to_string(&payload)?);
-
     reqwest::Client::new()
       .post(&self.hook_url)
       .json(&payload)
