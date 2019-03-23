@@ -4,10 +4,13 @@ use chrono::{DateTime, Utc};
 use md5::{Digest, Md5};
 use pickledb::{PickleDb, PickleDbDumpPolicy, SerializationMethod};
 use reqwest;
+use serde::de::DeserializeOwned;
+use serde_json::Value;
 
-use crate::models::*;
+use crate::models;
 
 const BASE_URL: &str = "http://api.smitegame.com/smiteapi.svc";
+const INVALID_SESSION: &str = "Invalid session id.";
 
 pub struct Smite {
   dev_id: String,
@@ -55,6 +58,49 @@ impl Smite {
     format!("{:x}", result)
   }
 
+  fn api_call<T: DeserializeOwned>(&mut self, method: &str, params: &[&str]) -> Result<T, Box<Error>> {
+    self.create_session(false)?;    
+
+    let resp = loop {
+      let ts = self.timestamp();
+      let sig = self.signature(method, &ts);
+      let mut url = format!(
+        "{base_url}/{method}json/{dev_id}/{signature}/{session}/{timestamp}",
+        base_url = BASE_URL,
+        method = method,
+        dev_id = self.dev_id,
+        signature = sig,
+        session = self.session_id.as_ref().unwrap(),
+        timestamp = ts,
+      );
+
+      if params.len() > 0 {
+        url = format!("{}/{}", url, params.join("/"));
+      }
+
+      let resp: Value = reqwest::Client::new()
+        .get(&url)
+        .send()?
+        .json()?;
+
+      if let Value::Array(v) = &resp {
+        if v.len() == 1 {
+          if let Value::Object(m) = &v[0] {
+            if m.get("ret_msg") == Some(&Value::String(INVALID_SESSION.to_string())) {
+              self.create_session(true)?;
+              continue;
+            }
+          }
+        }
+      }
+
+      break resp;
+    };
+
+    let resp = serde_json::from_value(resp)?;
+    Ok(resp)
+  }
+
   pub fn create_session(&mut self, force: bool) -> Result<(), Box<Error>> {
     if !force {
       if let Some(val) = self.db.get::<String>("session_id") {
@@ -67,7 +113,7 @@ impl Smite {
     let ts = self.timestamp();
     let sig = self.signature(method, &ts);
     let url = format!(
-      "{base_url}/{method}json/{dev_id}/{signature}/{timestamp}", 
+      "{base_url}/{method}json/{dev_id}/{signature}/{timestamp}",
       base_url = BASE_URL,
       method = method,
       dev_id = self.dev_id,
@@ -75,51 +121,24 @@ impl Smite {
       timestamp = ts,
     );
 
-    let session: Session = reqwest::Client::new()
-      .get(&url)
-      .send()?
-      .json()?;
+    let session: models::Session = reqwest::Client::new().get(&url).send()?.json()?;
 
-    self.db.set("session_id", &session.session_id).map_err(|e| format!("{}", e))?;
+    self
+      .db
+      .set("session_id", &session.session_id)
+      .map_err(|e| format!("{}", e))?;
     self.session_id = Some(session.session_id);
 
     Ok(())
   }
 
-  pub fn get_motd(&mut self) -> Result<Motd, Box<Error>> {
-    self.create_session(false)?;
+  pub fn get_motd(&mut self) -> Result<models::Motds, Box<Error>> {
+    let res = self.api_call("getmotd", &[])?;
+    Ok(res)
+  }
 
-    let motd: Motd = loop {
-      let method = "getmotd";
-      let ts = self.timestamp();
-      let sig = self.signature(method, &ts);
-      let url = format!(
-        "{base_url}/{method}json/{dev_id}/{signature}/{session}/{timestamp}", 
-        base_url = BASE_URL,
-        method = method,
-        dev_id = self.dev_id,
-        signature = sig,
-        session = self.session_id.as_ref().unwrap(),
-        timestamp = ts,
-      );
-
-      let motd: Motd = reqwest::Client::new()
-        .get(&url)
-        .send()?
-        .json()?;
-      
-      if motd.len() == 1 {
-        if let Some(ret_msg) = &motd[0].ret_msg {
-          if ret_msg == "Invalid session id." {
-            self.create_session(true)?;
-            continue;
-          }
-        }
-      }
-
-      break motd;
-    };
-
-    Ok(motd)
+  pub fn get_gods(&mut self) -> Result<models::Gods, Box<Error>> {
+    let res = self.api_call("getgods", &["1"])?;
+    Ok(res)
   }
 }
