@@ -23,7 +23,7 @@ impl super::Notify for Slack {
     let mut fields = vec![
       Field {
         title: "Game mode".to_string(),
-        value: m.game_mode.into(),
+        value: m.game_mode.clone().into(),
         short: Some(false),
       }
     ];
@@ -43,18 +43,50 @@ impl super::Notify for Slack {
       }
     }));
 
+    if !m.team1and2_gods.is_empty() {
+      let mut iter = m.team1and2_gods.iter();
+      let v = iter.by_ref().map(|id| m.gods.get(&id).unwrap().name.clone());
+      fields.push(Field {
+        title: "Team 1 and 2".to_string(),
+        value: v.collect::<Vec<_>>().join(", ").into(),
+        short: Some(false),
+      });
+    }
+
+    if !m.team1_gods.is_empty() {
+      let mut iter = m.team1_gods.iter();
+      let v = iter.by_ref().map(|id| m.gods.get(&id).unwrap().name.clone());
+      fields.push(Field {
+        title: "Team 1 only".to_string(),
+        value: v.collect::<Vec<_>>().join(", ").into(),
+        short: Some(false),
+      });
+    }
+
+    if !m.team2_gods.is_empty() {
+      let mut iter = m.team2_gods.iter();
+      let v = iter.by_ref().map(|id| m.gods.get(&id).unwrap().name.clone());
+      fields.push(Field {
+        title: "Team 2 only".to_string(),
+        value: v.collect::<Vec<_>>().join(", ").into(),
+        short: Some(false),
+      });
+    }
+
+    let attachments = vec![
+      AttachmentBuilder::new("")
+        .color("#3db156")
+        .footer("Smite MOTD")
+        .footer_icon("https://platform.slack-edge.com/img/default_application_icon.png")
+        .fields(fields)
+        .build()
+        .unwrap(),
+    ];
+
     let p = PayloadBuilder::new()
       .text(format!("*{}*\n{}", m.title, m.description))
       .username("smite")
-      .attachments(vec![
-        AttachmentBuilder::new("")
-          .color("#3db156")
-          .footer("Smite MOTD")
-          .footer_icon("https://platform.slack-edge.com/img/default_application_icon.png")
-          .fields(fields)
-          .build()
-          .unwrap(),
-      ])
+      .attachments(attachments)
       .build()
       .unwrap();
 
