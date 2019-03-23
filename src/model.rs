@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::error::Error;
 
 use crate::types;
@@ -14,6 +15,10 @@ pub struct Model {
   pub title: String,
   pub attributes: Vec<Attr>,
   pub description: String,
+  pub gods: HashMap<i64, types::God>,
+  pub team1_gods: Vec<i64>,
+  pub team2_gods: Vec<i64>,
+  pub team1and2_gods: Vec<i64>,
 }
 
 pub fn parse(g: types::Gods, m: types::Motds) -> Result<Model, Box<Error>> {
@@ -23,25 +28,27 @@ pub fn parse(g: types::Gods, m: types::Motds) -> Result<Model, Box<Error>> {
 
   let m = &m[0];
 
-  let mut model = Model::default();
   let mut description = String::new();
   let mut attributes = vec![];
 
   let mut s = m.description.as_ref().unwrap().as_str();
-  // Sometimes descriptions start with <li>. Not sure why, but 
+  // Sometimes descriptions start with <li>. Not sure why, but
   // we just strip it.
   if s.starts_with("<li>") {
-    s = &s[4..s.len()-4];
+    s = &s[4..s.len() - 4];
   }
-  
+
   if let Some(index) = s.find("<li>") {
     description.push_str(&s[0..index].trim());
     s = &s[index..];
 
     while let Some(index) = s.find("<li>") {
       if let Some(index2) = s.find("</li>") {
-        let parts = s[index+4..index2].splitn(2, ":").map(|s| s.trim()).collect::<Vec<&str>>();
-        s = &s[index2+5..];
+        let parts = s[index + 4..index2]
+          .splitn(2, ":")
+          .map(|s| s.trim())
+          .collect::<Vec<&str>>();
+        s = &s[index2 + 5..];
         if parts.len() == 2 {
           attributes.push(Attr::KeyValue(parts[0].to_string(), parts[1].to_string()));
         } else {
@@ -53,11 +60,57 @@ pub fn parse(g: types::Gods, m: types::Motds) -> Result<Model, Box<Error>> {
     description.push_str(s.trim());
   }
 
+  let mut gods = HashMap::new();
+  for god in g {
+    gods.insert(god.id, god);
+  }
+
+  let mut team1and2_gods = vec![];
+  let mut team1_gods: Vec<_> = m
+    .team1_gods_csv
+    .clone()
+    .unwrap_or_else(|| "".to_string())
+    .split(", ")
+    .filter(|v| *v != "")
+    .map(|v| v.parse().unwrap())
+    .collect();
+  let mut team2_gods: Vec<_> = m
+    .team2_gods_csv
+    .clone()
+    .unwrap_or_else(|| "".to_string())
+    .split(", ")
+    .filter(|v| *v != "")
+    .map(|v| v.parse().unwrap())
+    .collect();
+
+  let mut team1_index = 0;
+  let mut team2_index = 0;
+  'outer: while team1_index < team1_gods.len() {
+    while team2_index < team2_gods.len() {
+      if team1_gods[team1_index] == team2_gods[team2_index] {
+        team1and2_gods.push(team1_gods[team1_index]);
+        team1_gods.remove(team1_index);
+        team2_gods.remove(team2_index);
+        team2_index = 0;
+        continue 'outer;
+      }
+
+      team2_index += 1;
+    }
+
+    team1_index += 1;
+    team2_index = 0;
+  }
+
   Ok(Model {
-    game_mode: m.game_mode.clone().unwrap_or("".to_string()),
-    title: m.title.clone().unwrap_or("".to_string()),
+    game_mode: m.game_mode.clone().unwrap_or_else(|| "".to_string()),
+    title: m.title.clone().unwrap_or_else(|| "".to_string()),
     attributes: attributes,
     description: description,
+    gods: gods,
+    team1_gods: team1_gods,
+    team2_gods: team2_gods,
+    team1and2_gods: team1and2_gods,
   })
 }
 
@@ -67,8 +120,8 @@ pub fn parse(g: types::Gods, m: types::Motds) -> Result<Model, Box<Error>> {
 //     s.push_str("\n");
 //     s.push_str(&format!("Game mode: {}", self.game_mode));
 //     s.push_str("\n");
-//     s.push_str(&self.description);   
-//     s.push_str("\n"); 
+//     s.push_str(&self.description);
+//     s.push_str("\n");
 //     for attr in &self.attributes {
 //       s.push_str("\n");
 //       match attr {
