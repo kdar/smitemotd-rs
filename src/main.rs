@@ -6,18 +6,16 @@ use serde_json;
 use crate::notify::Notify;
 
 mod api;
-mod models;
-mod motd;
+mod types;
+mod model;
 mod notify;
 
 fn main() -> Result<(), Box<Error>> {
   env_logger::init();
 
   let mut smite = api::Smite::new(env!("SMITE_DEV_ID"), env!("SMITE_AUTH_KEY"));
-  // let motds = smite.get_motd()?;
-
-  println!("{:?}", smite.get_gods()?);
-  return Ok(());
+  let gods = smite.get_gods()?;
+  let motds = smite.get_motd()?;
 
   // let motds = r#"[
   //   {
@@ -46,11 +44,11 @@ fn main() -> Result<(), Box<Error>> {
 
   // let motds: models::Motd = serde_json::from_str(motds)?;
 
-  // let motd = motd::parse(motds)?;
+  let model = model::parse(gods, motds)?;
   // // println!("{:#?}", motd);
 
-  // let slack = notify::slack::Slack::new(env!("SLACK_HOOK"));
-  // slack.notify(motd)?;
+  let slack = notify::slack::Slack::new(env!("SLACK_HOOK"));
+  slack.notify(model)?;
 
   Ok(())
 }

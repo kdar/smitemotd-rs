@@ -2,7 +2,7 @@ use std::error::Error;
 
 use slack_hook::{Slack as SlackHook, PayloadBuilder, AttachmentBuilder, Field};
 
-use crate::motd::{self, Motd};
+use crate::model::{self, Model};
 
 pub struct Slack {
   hook_url: String,
@@ -17,7 +17,7 @@ impl Slack {
 }
 
 impl super::Notify for Slack {
-  fn notify(&self, m: Motd) -> Result<(), Box<Error>> {
+  fn notify(&self, m: Model) -> Result<(), Box<Error>> {
     let slack = SlackHook::new(self.hook_url.as_str()).unwrap();
 
     let mut fields = vec![
@@ -30,12 +30,12 @@ impl super::Notify for Slack {
 
     fields.extend(m.attributes.iter().map(|a| {
       match a {
-        motd::Attr::KeyValue(key, value) => Field {
+        model::Attr::KeyValue(key, value) => Field {
           title: key.to_string(),
           value: value.as_str().into(),
           short: Some(false),
         },
-        motd::Attr::Key(key) => Field {
+        model::Attr::Key(key) => Field {
           title: key.to_string(),
           value: "".into(),
           short: Some(false),

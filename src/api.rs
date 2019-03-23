@@ -7,7 +7,7 @@ use reqwest;
 use serde::de::DeserializeOwned;
 use serde_json::Value;
 
-use crate::models;
+use crate::types;
 
 const BASE_URL: &str = "http://api.smitegame.com/smiteapi.svc";
 const INVALID_SESSION: &str = "Invalid session id.";
@@ -121,7 +121,7 @@ impl Smite {
       timestamp = ts,
     );
 
-    let session: models::Session = reqwest::Client::new().get(&url).send()?.json()?;
+    let session: types::Session = reqwest::Client::new().get(&url).send()?.json()?;
 
     self
       .db
@@ -132,12 +132,12 @@ impl Smite {
     Ok(())
   }
 
-  pub fn get_motd(&mut self) -> Result<models::Motds, Box<Error>> {
+  pub fn get_motd(&mut self) -> Result<types::Motds, Box<Error>> {
     let res = self.api_call("getmotd", &[])?;
     Ok(res)
   }
 
-  pub fn get_gods(&mut self) -> Result<models::Gods, Box<Error>> {
+  pub fn get_gods(&mut self) -> Result<types::Gods, Box<Error>> {
     let res = self.api_call("getgods", &["1"])?;
     Ok(res)
   }
