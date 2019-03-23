@@ -21,6 +21,48 @@ pub struct Model {
   pub team1and2_gods: Vec<i64>,
 }
 
+impl ToString for Model {
+  fn to_string(&self) -> String {
+    let mut s = String::new();
+    s.push_str(&self.title);
+    s.push_str("\n");    
+    s.push_str(&self.description);
+    s.push_str("\n\n");
+    s.push_str(&format!("Game mode: {}", self.game_mode));
+
+    for attr in &self.attributes {
+      s.push_str("\n");
+      match attr {
+        Attr::KeyValue(key, value) => s.push_str(&format!("{}: {}", key, value)),
+        Attr::Key(key) => s.push_str(&key),
+      };
+    }
+
+    if !self.team1and2_gods.is_empty() {
+      s.push_str("\n");
+      let mut iter = self.team1and2_gods.iter();
+      let v = iter.by_ref().map(|id| self.gods.get(&id).unwrap().name.clone());
+      s.push_str(&format!("Team 1 and 2: {}", v.collect::<Vec<_>>().join(", ")));
+    }
+
+    if !self.team1_gods.is_empty() {
+      s.push_str("\n");
+      let mut iter = self.team1_gods.iter();
+      let v = iter.by_ref().map(|id| self.gods.get(&id).unwrap().name.clone());
+      s.push_str(&format!("Team 1 only: {}", v.collect::<Vec<_>>().join(", ")));
+    }
+
+    if !self.team2_gods.is_empty() {
+      s.push_str("\n");
+      let mut iter = self.team2_gods.iter();
+      let v = iter.by_ref().map(|id| self.gods.get(&id).unwrap().name.clone());
+      s.push_str(&format!("Team 2 only: {}", v.collect::<Vec<_>>().join(", ")));
+    }
+
+    s
+  }
+}
+
 pub fn parse(g: types::Gods, m: types::Motds) -> Result<Model, Box<Error>> {
   if m.len() == 0 {
     return Err("no motds".into());
@@ -113,27 +155,3 @@ pub fn parse(g: types::Gods, m: types::Motds) -> Result<Model, Box<Error>> {
     team1and2_gods: team1and2_gods,
   })
 }
-
-// pub fn pushover_html(&self) -> String {
-//     let mut s = String::new();
-//     s.push_str(&format!("<b>{}</b>", self.title));
-//     s.push_str("\n");
-//     s.push_str(&format!("Game mode: {}", self.game_mode));
-//     s.push_str("\n");
-//     s.push_str(&self.description);
-//     s.push_str("\n");
-//     for attr in &self.attributes {
-//       s.push_str("\n");
-//       match attr {
-//         Attr::KeyValue(key, value) => s.push_str(&format!("{}: {}", key, value)),
-//         Attr::Key(key) => s.push_str(&key),
-//       };
-//     }
-//     // format!(
-//     //   "{}\n{}\n{}",
-//     //   motd[0].title.as_ref().unwrap(),
-//     //   motd[0].game_mode.as_ref().unwrap(),
-//     //   msg_format(motd[0].description.as_ref().unwrap()),
-//     // )
-//     s
-//   }
