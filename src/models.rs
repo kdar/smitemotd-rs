@@ -7,10 +7,10 @@ pub struct Session {
   pub ret_msg: String,
 }
 
-pub type Motd = Vec<MotdElement>;
+pub type Motds = Vec<Motd>;
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct MotdElement {
+pub struct Motd {
   #[serde(rename = "team2GodsCSV")]
   pub team2_gods_csv: Option<String>,
   pub title: Option<String>,
@@ -25,4 +25,17 @@ pub struct MotdElement {
   pub max_players: Option<String>,
   #[serde(rename = "team1GodsCSV")]
   pub team1_gods_csv: Option<String>,
+}
+
+pub type Gods = Vec<God>;
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct God {
+  #[serde(rename = "Name")]
+  pub name: String,
+  #[serde(rename = "godCard_URL")]
+  pub god_card_url: String,
+  #[serde(rename = "godIcon_URL")]
+  pub god_icon_url: String,
+  pub id: i64,
 }

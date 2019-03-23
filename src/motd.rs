@@ -1,6 +1,6 @@
 use std::error::Error;
 
-use crate::models::{Motd as MotdModel};
+use crate::models::Motds;
 
 #[derive(Debug)]
 pub enum Attr {
@@ -16,7 +16,7 @@ pub struct Motd {
   pub description: String,
 }
 
-pub fn parse(m: MotdModel) -> Result<Motd, Box<Error>> {
+pub fn parse(m: Motds) -> Result<Motd, Box<Error>> {
   if m.len() == 0 {
     return Err("no motds".into());
   }
