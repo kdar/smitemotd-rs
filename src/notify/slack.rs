@@ -3,7 +3,7 @@ use std::error::Error;
 use reqwest;
 use serde_derive::{Deserialize, Serialize};
 
-use crate::model::{self, Model};
+use crate::model::Model;
 
 #[derive(Debug, Serialize, Deserialize, Default)]
 struct Payload {
@@ -50,12 +50,12 @@ impl super::Notify for Slack {
     }];
 
     fields.extend(m.attributes.iter().map(|a| match a {
-      model::Attr::KeyValue(key, value) => Field {
+      (key, Some(value)) => Field {
         title: key.to_string(),
         value: value.to_string(),
         short: true,
       },
-      model::Attr::Key(key) => Field {
+      (key, None) => Field {
         title: key.to_string(),
         value: "".into(),
         short: true,
