@@ -22,6 +22,24 @@ fn main() -> Result<(), Box<Error>> {
     .author(crate_authors!())
     .about(crate_description!())
     .arg(
+      Arg::with_name("dev-id")
+        .long("dev-id")
+        .value_name("ID")
+        .help("Sets the dev ID for the Smite API")
+        .takes_value(true)
+        .required(true)
+        .env("DEV_ID"),
+    )
+    .arg(
+      Arg::with_name("auth-key")
+        .long("auth-key")
+        .value_name("KEY")
+        .help("Sets the auth key for the Smite API")
+        .takes_value(true)
+        .required(true)
+        .env("AUTH_KEY"),
+    )
+    .arg(
       Arg::with_name("notify-pushed")
         .long("notify-pushed")
         .value_name("OPTS")
