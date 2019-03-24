@@ -2,19 +2,24 @@ use std::error::Error;
 
 use reqwest;
 use serde_json::json;
+use serde_derive::Deserialize;
 
 use crate::model::Model;
 
-pub struct Pushbullet {
-  access_token: String,
+#[derive(Deserialize, Debug)]
+pub struct PushbulletOpts {
+  token: String,
   channel_tag: String,
 }
 
+pub struct Pushbullet {
+  opts: PushbulletOpts,
+}
+
 impl Pushbullet {
-  pub fn new(access_token: &str, channel_tag: &str) -> Self {
+  pub fn new(opts: PushbulletOpts) -> Self {
     Self {
-      access_token: access_token.to_string(),
-      channel_tag: channel_tag.to_string(),
+      opts,
     }
   }
 }
@@ -23,9 +28,9 @@ impl super::Notify for Pushbullet {
   fn notify(&self, m: Model) -> Result<(), Box<Error>> {
     reqwest::Client::new()
       .post("https://api.pushbullet.com/v2/pushes")
-      .header("Access-Token", self.access_token.clone())
+      .header("Access-Token", self.opts.token.clone())
       .json(&json!({
-        "channel_tag": &self.channel_tag,
+        "channel_tag": &self.opts.channel_tag,
         "type": "note",
         "title": m.title,
         "body": m.to_string(),
