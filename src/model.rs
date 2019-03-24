@@ -3,17 +3,11 @@ use std::error::Error;
 
 use crate::types;
 
-#[derive(Debug)]
-pub enum Attr {
-  KeyValue(String, String),
-  Key(String),
-}
-
 #[derive(Debug, Default)]
 pub struct Model {
   pub game_mode: String,
   pub title: String,
-  pub attributes: Vec<Attr>,
+  pub attributes: Vec<(String, Option<String>)>,
   pub description: String,
   pub gods: HashMap<i64, types::God>,
   pub team1_gods: Vec<i64>,
@@ -33,8 +27,8 @@ impl ToString for Model {
     for attr in &self.attributes {
       s.push_str("\n");
       match attr {
-        Attr::KeyValue(key, value) => s.push_str(&format!("{}: {}", key, value)),
-        Attr::Key(key) => s.push_str(&key),
+        (key, Some(value)) => s.push_str(&format!("{}: {}", key, value)),
+        (key, None) => s.push_str(&key),
       };
     }
 
@@ -92,9 +86,9 @@ pub fn parse(g: types::Gods, m: types::Motds) -> Result<Model, Box<Error>> {
           .collect::<Vec<&str>>();
         s = &s[index2 + 5..];
         if parts.len() == 2 {
-          attributes.push(Attr::KeyValue(parts[0].to_string(), parts[1].to_string()));
+          attributes.push((parts[0].to_string(), Some(parts[1].to_string())));
         } else {
-          attributes.push(Attr::Key(parts[0].to_string()));
+          attributes.push((parts[0].to_string(), None));
         }
       }
     }
