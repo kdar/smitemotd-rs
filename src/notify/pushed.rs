@@ -1,19 +1,24 @@
 use std::error::Error;
 
 use reqwest;
+use serde_derive::Deserialize;
 
 use crate::model::Model;
 
+#[derive(Deserialize, Debug)]
+pub struct PushedOpts {
+  key: String,
+  secret: String,
+}
+
 pub struct Pushed {
-  app_key: String,
-  app_secret: String,
+  opts: PushedOpts,
 }
 
 impl Pushed {
-  pub fn new(app_key: &str, app_secret: &str) -> Self {
+  pub fn new(opts: PushedOpts) -> Self {
     Self {
-      app_key: app_key.to_string(),
-      app_secret: app_secret.to_string(),
+      opts,
     }
   }
 }
@@ -23,8 +28,8 @@ impl super::Notify for Pushed {
     reqwest::Client::new()
       .post("https://api.pushed.co/1/push")
       .form(&[
-        ("app_key", self.app_key.clone()),
-        ("app_secret", self.app_secret.clone()),
+        ("app_key", self.opts.key.clone()),
+        ("app_secret", self.opts.secret.clone()),
         ("target_type", "app".to_string()),
         (
           "content",
