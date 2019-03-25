@@ -135,12 +135,41 @@ Extra:"#,
     )
     .get_matches();
 
-  println!("{:#?}", matches);
+  // println!("{:#?}", matches);
 
-  let t = suboptions!(matches.value_of("notify-pushbullet").unwrap(), notify::pushbullet::PushbulletOpts);
-  println!("{:#?}", t);
+  // let t = suboptions!(matches.value_of("notify-pushbullet").unwrap(), notify::pushbullet::PushbulletOpts);
+  // println!("{:#?}", t);
 
-  return Ok(());
+  let mut notifies: Vec<Box<notify::Notify>> = vec![];
+
+  if let Some(values) = matches.values_of("notify-slack") {
+    for value in values {
+      let opts = suboptions!(value, notify::slack::SlackOpts);
+      notifies.push(Box::new(notify::slack::Slack::new(opts)));
+    }
+  }
+
+  if let Some(values) = matches.values_of("notify-pushed") {
+    for value in values {
+      let opts = suboptions!(value, notify::pushed::PushedOpts);
+      notifies.push(Box::new(notify::pushed::Pushed::new(opts)));
+    }
+  }
+
+  if let Some(values) = matches.values_of("notify-pushbullet") {
+    for value in values {
+      let opts = suboptions!(value, notify::pushbullet::PushbulletOpts);
+      notifies.push(Box::new(notify::pushbullet::Pushbullet::new(opts)));
+    }
+  }
+
+  if let Some(values) = matches.values_of("notify-stream") {
+    for value in values {
+      let opts = suboptions!(value, notify::stream::StreamOpts);
+      let stream = notify::stream::Stream::new(opts)?;
+      notifies.push(Box::new(stream));
+    }
+  }
 
   let mut smite = api::Smite::new(env!("SMITE_DEV_ID"), env!("SMITE_AUTH_KEY"));
   let gods = smite.get_gods()?;
@@ -174,9 +203,13 @@ Extra:"#,
   let motds: types::Motds = serde_json::from_str(motds)?;
 
   let model = model::parse(gods, motds)?;
-  println!("{}", model.to_string());
-  let slack = notify::slack::Slack::new(env!("SLACK_HOOK"));
-  slack.notify(model)?;
+  // println!("{}", model.to_string());
+  // let slack = notify::slack::Slack::new(env!("SLACK_HOOK"));
+  // slack.notify(model)?;
+
+  for n in notifies {
+    n.notify(&model);
+  }
 
   Ok(())
 }
