@@ -3,8 +3,6 @@ use std::error::Error;
 use clap::{crate_authors, crate_description, crate_name, crate_version, App, AppSettings, Arg};
 use env_logger;
 
-use crate::notify::Notify;
-
 mod api;
 mod model;
 mod notify;
