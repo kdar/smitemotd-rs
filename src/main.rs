@@ -171,9 +171,12 @@ Extra:"#,
     }
   }
 
-  let mut smite = api::Smite::new(env!("SMITE_DEV_ID"), env!("SMITE_AUTH_KEY"));
+  let mut smite = api::Smite::new(
+    matches.value_of("dev-id").unwrap(),
+    matches.value_of("auth-key").unwrap(),
+  );
   let gods = smite.get_gods()?;
-  // let motds = smite.get_motd()?;
+  let motds = smite.get_motd()?;
 
   // let motds = r#"[
   //   {
@@ -188,27 +191,25 @@ Extra:"#,
   //     "team1GodsCSV": ""
   //   }
   // ]"#;
-  let motds = r#"[{
-    "team2GodsCSV": "1956, 1668, 2034, 1898, 1748, 2037, 1809, 1678, 2008, 1966, 1921, 1784, 1978, 1763, 1848, 1673, 1677, 1993, 1915, 1872, 1958, 2000, 1988, 2005, 1747, 2030, 1924, 1991, 1723, 1864, 1926",
-    "title": "Don't Pinch Me Bro",
-    "gameMode": "Siege",
-    "ret_msg": null,
-    "startDateTime": "3/17/2019 9:00:00 AM",
-    "description": "<li>The gods in green are having a St. Patricks day party in the most green battlefield they can, the Mayan Jungle.<li>Map: Siege (5v5)</li><li>Gods: Ones that have green on them.</li><li>Selection: Blind Pick</li></li>",
-    "name": "Don't Pinch Me Bro",
-    "maxPlayers": "5",
-    "team1GodsCSV": "1956, 2056, 1668, 2034, 1898, 1748, 2037, 1809, 1678, 2008, 1966, 1921, 2075, 1784, 1978, 1763, 1848, 1673, 1677, 1993, 2051, 1915, 1872, 1958, 2000, 2113, 2065, 1988, 2005, 1747, 2030, 1924, 1991, 1723, 1864, 2072, 1926"
-  }]"#;
+  // let motds = r#"[{
+  //   "team2GodsCSV": "1956, 1668, 2034, 1898, 1748, 2037, 1809, 1678, 2008, 1966, 1921, 1784, 1978, 1763, 1848, 1673, 1677, 1993, 1915, 1872, 1958, 2000, 1988, 2005, 1747, 2030, 1924, 1991, 1723, 1864, 1926",
+  //   "title": "Don't Pinch Me Bro",
+  //   "gameMode": "Siege",
+  //   "ret_msg": null,
+  //   "startDateTime": "3/17/2019 9:00:00 AM",
+  //   "description": "<li>The gods in green are having a St. Patricks day party in the most green battlefield they can, the Mayan Jungle.<li>Map: Siege (5v5)</li><li>Gods: Ones that have green on them.</li><li>Selection: Blind Pick</li></li>",
+  //   "name": "Don't Pinch Me Bro",
+  //   "maxPlayers": "5",
+  //   "team1GodsCSV": "1956, 2056, 1668, 2034, 1898, 1748, 2037, 1809, 1678, 2008, 1966, 1921, 2075, 1784, 1978, 1763, 1848, 1673, 1677, 1993, 2051, 1915, 1872, 1958, 2000, 2113, 2065, 1988, 2005, 1747, 2030, 1924, 1991, 1723, 1864, 2072, 1926"
+  // }]"#;
 
-  let motds: types::Motds = serde_json::from_str(motds)?;
+  // let motds: types::Motds = serde_json::from_str(motds)?;
 
   let model = model::parse(gods, motds)?;
-  // println!("{}", model.to_string());
-  // let slack = notify::slack::Slack::new(env!("SLACK_HOOK"));
-  // slack.notify(model)?;
-
   for n in notifies {
-    n.notify(&model);
+    if let Err(e) = n.notify(&model) {
+      eprintln!("error: {}", e);
+    }
   }
 
   Ok(())
