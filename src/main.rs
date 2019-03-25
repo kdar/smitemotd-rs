@@ -1,7 +1,9 @@
 use std::error::Error;
+use std::fs;
 
 use clap::{crate_authors, crate_description, crate_name, crate_version, App, AppSettings, Arg};
 use env_logger;
+use dirs;
 
 mod api;
 mod model;
@@ -9,6 +11,7 @@ mod notify;
 mod types;
 #[macro_use]
 mod macros;
+mod store;
 
 fn main() -> Result<(), Box<Error>> {
   env_logger::init();
@@ -178,9 +181,17 @@ Extra:"#,
     notifies.push(Box::new(stream));
   }
 
+  let app_config_path = match dirs::config_dir() {
+    Some(v) => v.join("smitemotd"),
+    None => "".into(),
+  };
+
+  fs::create_dir_all(&app_config_path)?;
+
   let mut smite = api::Smite::new(
     matches.value_of("dev-id").unwrap(),
     matches.value_of("auth-key").unwrap(),
+    Box::new(store::pickledb::PickleDb::new(app_config_path)),
   );
   let gods = smite.get_gods()?;
   let motds = smite.get_motd()?;

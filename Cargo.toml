@@ -18,6 +18,7 @@ env_logger = "0.6.1"
 clap = { version = "2.32.0", features = ["color"] }
 toml = "0.5.0"
 yansi = "0.5.0"
+dirs = "1.0.5"
 
 [build-dependencies]
 denv = "0.2.0"
