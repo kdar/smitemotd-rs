@@ -5,6 +5,7 @@ use serde_json::json;
 use serde_derive::Deserialize;
 
 use crate::model::Model;
+use super::fmt;
 
 #[derive(Deserialize, Debug)]
 pub struct PushbulletOpts {
@@ -33,7 +34,7 @@ impl super::Notify for Pushbullet {
         "channel_tag": &self.opts.channel_tag,
         "type": "note",
         "title": m.title,
-        "body": m.to_string(),
+        "body": fmt::format(&m, false),
       }))
       .send()?
       .json()?;

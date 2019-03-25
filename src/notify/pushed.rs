@@ -4,6 +4,7 @@ use reqwest;
 use serde_derive::Deserialize;
 
 use crate::model::Model;
+use super::fmt;
 
 #[derive(Deserialize, Debug)]
 pub struct PushedOpts {
@@ -33,7 +34,7 @@ impl super::Notify for Pushed {
         ("target_type", "app".to_string()),
         (
           "content",
-          m.to_string(),
+          fmt::format(&m, false),
         ),
       ])
       .send()?;
