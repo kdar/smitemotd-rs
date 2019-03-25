@@ -25,7 +25,7 @@ impl Pushbullet {
 }
 
 impl super::Notify for Pushbullet {
-  fn notify(&self, m: Model) -> Result<(), Box<Error>> {
+  fn notify(&self, m: &Model) -> Result<(), Box<Error>> {
     reqwest::Client::new()
       .post("https://api.pushbullet.com/v2/pushes")
       .header("Access-Token", self.opts.token.clone())

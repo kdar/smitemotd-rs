@@ -27,20 +27,25 @@ struct Field {
   short: bool,
 }
 
+#[derive(Deserialize, Debug)]
+pub struct SlackOpts {
+  hook: String,
+}
+
 pub struct Slack {
-  hook_url: String,
+  opts: SlackOpts,
 }
 
 impl Slack {
-  pub fn new(hook_url: &str) -> Self {
+  pub fn new(opts: SlackOpts) -> Self {
     Self {
-      hook_url: hook_url.to_string(),
+      opts,
     }
   }
 }
 
 impl super::Notify for Slack {
-  fn notify(&self, m: Model) -> Result<(), Box<Error>> {
+  fn notify(&self, m: &Model) -> Result<(), Box<Error>> {
     let mut payload = Payload::default();
 
     let mut fields = vec![Field {
@@ -108,7 +113,7 @@ impl super::Notify for Slack {
     }];
 
     reqwest::Client::new()
-      .post(&self.hook_url)
+      .post(&self.opts.hook)
       .json(&payload)
       .send()?;
 
