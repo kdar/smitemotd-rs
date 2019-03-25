@@ -8,12 +8,12 @@ use serde_derive::Deserialize;
 use crate::model::Model;
 use super::fmt;
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Default)]
 pub struct StreamOpts {
-  stdout: Option<bool>,
-  stderr: Option<bool>,
-  file: Option<String>,
-  color: Option<bool>,
+  pub stdout: Option<bool>,
+  pub stderr: Option<bool>,
+  pub file: Option<String>,
+  pub color: Option<bool>,
 }
 
 pub struct Stream {
