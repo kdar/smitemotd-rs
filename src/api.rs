@@ -2,12 +2,12 @@ use std::error::Error;
 
 use chrono::{DateTime, Utc};
 use md5::{Digest, Md5};
-use pickledb::{PickleDb, PickleDbDumpPolicy, SerializationMethod};
 use reqwest;
 use serde::de::DeserializeOwned;
 use serde_json::Value;
 
 use crate::types;
+use crate::store;
 
 const BASE_URL: &str = "http://api.smitegame.com/smiteapi.svc";
 const INVALID_SESSION: &str = "Invalid session id.";
@@ -15,29 +15,16 @@ const INVALID_SESSION: &str = "Invalid session id.";
 pub struct Smite {
   dev_id: String,
   auth_key: String,
-  db: PickleDb,
   session_id: Option<String>,
+  store: Box<store::Store>,
 }
 
 impl Smite {
-  pub fn new(dev_id: &str, auth_key: &str) -> Smite {
-    let db = match PickleDb::load(
-      "smitemotd.db",
-      PickleDbDumpPolicy::AutoDump,
-      SerializationMethod::Json,
-    ) {
-      Ok(v) => v,
-      Err(_) => PickleDb::new(
-        "smitemotd.db",
-        PickleDbDumpPolicy::AutoDump,
-        SerializationMethod::Json,
-      ),
-    };
-
+  pub fn new(dev_id: &str, auth_key: &str, store: Box<store::Store>) -> Smite {
     Smite {
       dev_id: dev_id.to_string(),
       auth_key: auth_key.to_string(),
-      db: db,
+      store,
       session_id: None,
     }
   }
@@ -103,7 +90,7 @@ impl Smite {
 
   pub fn create_session(&mut self, force: bool) -> Result<(), Box<Error>> {
     if !force {
-      if let Some(val) = self.db.get::<String>("session_id") {
+      if let Ok(Some(val)) = self.store.get_session_id() {
         self.session_id = Some(val);
         return Ok(());
       }
@@ -124,8 +111,8 @@ impl Smite {
     let session: types::Session = reqwest::Client::new().get(&url).send()?.json()?;
 
     self
-      .db
-      .set("session_id", &session.session_id)
+      .store
+      .set_session_id(&session.session_id)
       .map_err(|e| format!("{}", e))?;
     self.session_id = Some(session.session_id);
 
