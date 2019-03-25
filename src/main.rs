@@ -168,6 +168,15 @@ Extra:"#,
       notifies.push(Box::new(stream));
     }
   }
+  
+  if notifies.len() == 0 {
+    let stream = notify::stream::Stream::new(notify::stream::StreamOpts{
+      stdout: Some(true),
+      color: Some(true),
+      ..notify::stream::StreamOpts::default()
+    })?;
+    notifies.push(Box::new(stream));
+  }
 
   let mut smite = api::Smite::new(
     matches.value_of("dev-id").unwrap(),
