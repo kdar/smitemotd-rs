@@ -15,63 +15,6 @@ pub struct Model {
   pub team1and2_gods: Vec<i64>,
 }
 
-impl ToString for Model {
-  fn to_string(&self) -> String {
-    let mut s = String::new();
-    s.push_str(&self.title);
-    s.push_str("\n");
-    s.push_str(&self.description);
-    s.push_str("\n\n");
-    s.push_str(&format!("Game mode: {}", self.game_mode));
-
-    for attr in &self.attributes {
-      s.push_str("\n");
-      match attr {
-        (key, Some(value)) => s.push_str(&format!("{}: {}", key, value)),
-        (key, None) => s.push_str(&key),
-      };
-    }
-
-    if !self.team1and2_gods.is_empty() {
-      s.push_str("\n");
-      let mut iter = self.team1and2_gods.iter();
-      let v = iter
-        .by_ref()
-        .map(|id| self.gods.get(&id).unwrap().name.clone());
-      s.push_str(&format!(
-        "Team 1 and 2: {}",
-        v.collect::<Vec<_>>().join(", ")
-      ));
-    }
-
-    if !self.team1_gods.is_empty() {
-      s.push_str("\n");
-      let mut iter = self.team1_gods.iter();
-      let v = iter
-        .by_ref()
-        .map(|id| self.gods.get(&id).unwrap().name.clone());
-      s.push_str(&format!(
-        "Team 1 only: {}",
-        v.collect::<Vec<_>>().join(", ")
-      ));
-    }
-
-    if !self.team2_gods.is_empty() {
-      s.push_str("\n");
-      let mut iter = self.team2_gods.iter();
-      let v = iter
-        .by_ref()
-        .map(|id| self.gods.get(&id).unwrap().name.clone());
-      s.push_str(&format!(
-        "Team 2 only: {}",
-        v.collect::<Vec<_>>().join(", ")
-      ));
-    }
-
-    s
-  }
-}
-
 pub fn parse(g: types::Gods, m: types::Motds) -> Result<Model, Box<Error>> {
   if m.len() == 0 {
     return Err("no motds".into());
