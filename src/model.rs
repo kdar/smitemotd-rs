@@ -53,6 +53,8 @@ impl ToString for Model {
       s.push_str(&format!("Team 2 only: {}", v.collect::<Vec<_>>().join(", ")));
     }
 
+    s.push_str("\n");
+
     s
   }
 }
