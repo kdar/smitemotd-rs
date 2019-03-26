@@ -14,7 +14,7 @@ macro_rules! suboptions {
     let tmp: Outer = toml::from_str(&format!(
       "_ = {{ {} }}",
       $str,
-    ))?;
+    )).map_err(|e| format!("{:?}. Tried to parse: _ = {{ {} }}", e, $str))?;
 
     tmp.inner
   }}
