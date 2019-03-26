@@ -49,8 +49,8 @@ fn main() -> Result<(), Box<Error>> {
           r#"Notifies via Pushed.co
 
 Options:
-key - The app key for Pushed
-secret - The app secret for Pushed
+  key - The app key for Pushed
+  secret - The app secret for Pushed
 
 Example: 'key="1234", secret="5678"'
 
@@ -71,8 +71,8 @@ Extra:"#,
           r#"Notifies via Pushbullet
 
 Options:
-token - The token for Pushbullet
-channel_tag - The channel tag to push to
+  token - The token for Pushbullet
+  channel_tag - The channel tag to push to
 
 Example: 'token="1234", channel_tag="smitemotd"'
 
@@ -93,7 +93,7 @@ Extra:"#,
           r#"Notifies via Slack
 
 Options:
-hook - The url for the slack hook
+  hook - The url for the slack hook
 
 Example: 'hook="https://hooks.slack.com/services/..."'
 
@@ -114,10 +114,10 @@ Extra:"#,
           r#"Notifies via stdout, stderr, or a file
 
 Options:
-stdout - Whether to use stdout [true/false]
-stderr - Whether to use stderr [true/false]
-file - The file name to write to
-color: Whether to colorize output (ANSI) [true/false]
+  stdout - Whether to use stdout [true/false]
+  stderr - Whether to use stderr [true/false]
+  file - The file name to write to
+  color: Whether to colorize output (ANSI) [true/false]
 
 stdout, stderr, and file are mutually exclusive
 
@@ -133,6 +133,33 @@ Extra:"#,
         .use_delimiter(true)
         .value_delimiter(";")
         .env("NOTIFY_STREAM"),
+    )
+    .arg(
+      Arg::with_name("notify-email")
+        .long("notify-email")
+        .value_name("OPTS")
+        .help("Notifies via email")
+        .long_help(
+          r#"Notifies via email
+
+Options:
+  from - The from email address
+  recipients - A list of recipients to receive the email, 
+  subject - Optional subject for email
+  username - Optional username for SMTP server
+  password - Optional password for SMTP server
+  smtp - The smtp host to connect to
+
+Example: 
+  'from="hey@gmail.com", recipients = ["yolo@gmail.com"], subject = "Hey", smtp = "smtp.gmail.com"'
+
+Extra:"#,
+        )
+        .takes_value(true)
+        .multiple(true)
+        .use_delimiter(true)
+        .value_delimiter(";")
+        .env("NOTIFY_EMAIL"),
     )
     .get_matches();
 
@@ -169,6 +196,13 @@ Extra:"#,
       let opts = suboptions!(value, notify::stream::StreamOpts);
       let stream = notify::stream::Stream::new(opts)?;
       notifies.push(Box::new(stream));
+    }
+  }
+
+  if let Some(values) = matches.values_of("notify-email") {
+    for value in values {
+      let opts = suboptions!(value, notify::email::EmailOpts);
+      notifies.push(Box::new(notify::email::Email::new(opts)?));
     }
   }
   
@@ -226,7 +260,7 @@ Extra:"#,
   let model = model::parse(gods, motds)?;
   for n in notifies {
     if let Err(e) = n.notify(&model) {
-      eprintln!("error: {}", e);
+      eprintln!("Error: {}", e);
     }
   }
 
