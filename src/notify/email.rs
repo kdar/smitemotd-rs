@@ -1,29 +1,66 @@
-// use lettre::smtp::authentication::Credentials;
-// use lettre::{EmailAddress, Envelope, SendableEmail, SmtpClient, Transport};
+use std::error::Error;
 
-//   let recipients = env!("MAIL_RECIPIENTS");
-//   let recipients = recipients.split(",").map(|s| EmailAddress::new(s.to_string()).unwrap()).collect();
+use lettre::smtp::authentication::Credentials;
+use lettre::{EmailAddress, Envelope, SendableEmail, SmtpClient, Transport};
+use serde_derive::Deserialize;
+use uuid::Uuid;
 
-//   let email = SendableEmail::new(
-//     Envelope::new(
-//       Some(EmailAddress::new(env!("GMAIL_USERNAME").to_string()).unwrap()),
-//       recipients,
-//     )
-//     .unwrap(),
-//     "id".to_string(),
-//     motd.pushover_html().into_bytes(),
-//   );
+use super::fmt;
+use crate::model::Model;
 
-//   let creds = Credentials::new(
-//     env!("GMAIL_USERNAME").to_string(),
-//     env!("GMAIL_PASSWORD").to_string(),
-//   );
+#[derive(Deserialize, Debug)]
+pub struct EmailOpts {
+  recipients: Vec<EmailAddress>,
+  from: EmailAddress,
+  subject: Option<String>,
+  username: Option<String>,
+  password: Option<String>,
+  smtp: String,
+}
 
-//   // Open a remote connection to gmail
-//   let mut mailer = SmtpClient::new_simple("smtp.gmail.com")
-//     .unwrap()
-//     .credentials(creds)
-//     .transport();
+pub struct Email {
+  opts: EmailOpts,
+  // from: EmailAddress,
+  // recipients: Vec<EmailAddress>,
+}
 
-//   // Send the email
-//   mailer.send(email)?;
+impl Email {
+  pub fn new(opts: EmailOpts) -> Result<Self, Box<Error>> {
+    // let mut recipients = vec![];
+    // for rec in &opts.recipients {
+    //   recipients.push(EmailAddress::new(rec)?);
+    // }
+
+    Ok(Self {
+      opts, /*, recipients*/
+    })
+  }
+}
+
+impl super::Notify for Email {
+  fn notify(&self, m: &Model) -> Result<(), Box<Error>> {
+    let message_id = format!("<{}.smitemotd@localhost>", Uuid::new_v4());
+
+    let email = SendableEmail::new(
+      Envelope::new(Some(self.opts.from.clone()), self.opts.recipients.clone())?,
+      message_id,
+      fmt::format(m, false).into_bytes(),
+    );
+
+    let mut mailer = SmtpClient::new_simple(&self.opts.smtp)?;
+
+    if let Some(username) = &self.opts.username {
+      let creds = Credentials::new(
+        username.to_string(),
+        self.opts.password.clone().unwrap_or_else(|| "".to_string()),
+      );
+
+      mailer = mailer.credentials(creds);
+    }
+
+    let mut mailer = mailer.transport();
+    mailer.send(email)?;
+
+    Ok(())
+  }
+}
