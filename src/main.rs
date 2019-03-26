@@ -2,8 +2,8 @@ use std::error::Error;
 use std::fs;
 
 use clap::{crate_authors, crate_description, crate_name, crate_version, App, AppSettings, Arg};
-use env_logger;
 use dirs;
+use env_logger;
 
 mod api;
 mod model;
@@ -12,6 +12,24 @@ mod types;
 #[macro_use]
 mod macros;
 mod store;
+
+macro_rules! arg_env {
+  ($arg:expr, $str:expr) => {{
+    #[allow(unused_mut)]
+    let mut arg = $arg.env($str);
+    #[cfg(feature = "compile_env")]
+    {
+      if let Some(v) = option_env!($str) { 
+        arg = arg.default_value(v);
+      }
+    }
+    arg
+  }};
+}
+
+// fn arg_env<A: Into<Arg<'a, 'b>>>(mut arg: A, env: &str) -> Arg<'a, 'b> {
+
+// }
 
 fn main() -> Result<(), Box<Error>> {
   env_logger::init();
@@ -22,25 +40,25 @@ fn main() -> Result<(), Box<Error>> {
     .version(crate_version!())
     .author(crate_authors!())
     .about(crate_description!())
-    .arg(
+    .arg(arg_env!(
       Arg::with_name("dev-id")
         .long("dev-id")
         .value_name("ID")
         .help("Sets the dev ID for the Smite API")
         .takes_value(true)
-        .required(true)
-        .env("DEV_ID"),
-    )
-    .arg(
+        .required(true),
+      "DEV_ID"
+    ))
+    .arg(arg_env!(
       Arg::with_name("auth-key")
         .long("auth-key")
         .value_name("KEY")
         .help("Sets the auth key for the Smite API")
         .takes_value(true)
-        .required(true)
-        .env("AUTH_KEY"),
-    )
-    .arg(
+        .required(true),
+      "AUTH_KEY"
+    ))
+    .arg(arg_env!(
       Arg::with_name("notify-pushed")
         .long("notify-pushed")
         .value_name("OPTS")
@@ -59,10 +77,10 @@ Extra:"#,
         .takes_value(true)
         .multiple(true)
         .use_delimiter(true)
-        .value_delimiter(";")
-        .env("NOTIFY_PUSHED"),
-    )
-    .arg(
+        .value_delimiter(";"),
+      "NOTIFY_PUSHED"
+    ))
+    .arg(arg_env!(
       Arg::with_name("notify-pushbullet")
         .long("notify-pushbullet")
         .value_name("OPTS")
@@ -81,10 +99,10 @@ Extra:"#,
         .takes_value(true)
         .multiple(true)
         .use_delimiter(true)
-        .value_delimiter(";")
-        .env("NOTIFY_PUSHBULLET"),
-    )
-    .arg(
+        .value_delimiter(";"),
+      "NOTIFY_PUSHBULLET"
+    ))
+    .arg(arg_env!(
       Arg::with_name("notify-slack")
         .long("notify-slack")
         .value_name("OPTS")
@@ -102,10 +120,10 @@ Extra:"#,
         .takes_value(true)
         .multiple(true)
         .use_delimiter(true)
-        .value_delimiter(";")
-        .env("NOTIFY_SLACK"),
-    )
-    .arg(
+        .value_delimiter(";"),
+      "NOTIFY_SLACK"
+    ))
+    .arg(arg_env!(
       Arg::with_name("notify-stream")
         .long("notify-stream")
         .value_name("OPTS")
@@ -131,10 +149,10 @@ Extra:"#,
         .takes_value(true)
         .multiple(true)
         .use_delimiter(true)
-        .value_delimiter(";")
-        .env("NOTIFY_STREAM"),
-    )
-    .arg(
+        .value_delimiter(";"),
+      "NOTIFY_STREAM"
+    ))
+    .arg(arg_env!(
       Arg::with_name("notify-email")
         .long("notify-email")
         .value_name("OPTS")
@@ -158,9 +176,9 @@ Extra:"#,
         .takes_value(true)
         .multiple(true)
         .use_delimiter(true)
-        .value_delimiter(";")
-        .env("NOTIFY_EMAIL"),
-    )
+        .value_delimiter(";"),
+      "NOTIFY_EMAIL"
+    ))
     .get_matches();
 
   // println!("{:#?}", matches);
@@ -205,9 +223,9 @@ Extra:"#,
       notifies.push(Box::new(notify::email::Email::new(opts)?));
     }
   }
-  
+
   if notifies.len() == 0 {
-    let stream = notify::stream::Stream::new(notify::stream::StreamOpts{
+    let stream = notify::stream::Stream::new(notify::stream::StreamOpts {
       stdout: Some(true),
       color: Some(true),
       ..notify::stream::StreamOpts::default()
