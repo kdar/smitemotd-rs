@@ -28,7 +28,7 @@ impl Stream {
     } else if let Some(true) = opts.stderr {
       Box::new(io::stderr()) as Box<Write>
     } else if let Some(v) = &opts.file {
-      Box::new(File::open(v)?) as Box<Write>
+      Box::new(File::create(v)?) as Box<Write>
     } else {
       return Err("need one of the following options: stdout, stderr, file".into());
     });
