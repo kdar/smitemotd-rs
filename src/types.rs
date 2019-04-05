@@ -29,7 +29,7 @@ pub struct Motd {
 
 pub type Gods = Vec<God>;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Default)]
 pub struct God {
   #[serde(rename = "Name")]
   pub name: String,
