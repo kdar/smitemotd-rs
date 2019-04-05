@@ -17,17 +17,20 @@ mod macros;
 mod store;
 
 macro_rules! arg_env {
-  ($arg:expr, $str:expr) => {{
-    #[allow(unused_mut)]
-    let mut arg = $arg.env($str);
-    #[cfg(feature = "compile_env")]
+  ($arg:expr, $str:expr) => {
+    #[allow(clippy::let_and_return)]
     {
-      if let Some(v) = option_env!($str) {
-        arg = arg.default_value(v);
+      #[allow(unused_mut)]
+      let mut arg = $arg.env($str);
+      #[cfg(feature = "compile_env")]
+      {
+        if let Some(v) = option_env!($str) {
+          arg = arg.default_value(v);
+        }
       }
+      arg
     }
-    arg
-  }};
+  };
 }
 
 fn main() -> Result<(), Box<Error>> {
@@ -220,7 +223,7 @@ Extra:"#,
     }
   }
 
-  if notifies.len() == 0 {
+  if notifies.is_empty() {
     let stream = notify::stream::Stream::new(notify::stream::StreamOpts {
       stdout: Some(true),
       color: Some(true),

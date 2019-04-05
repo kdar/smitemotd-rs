@@ -25,7 +25,7 @@ impl Model {
 }
 
 pub fn parse(g: types::Gods, m: types::Motds) -> Result<Model, Box<Error>> {
-  if m.len() == 0 {
+  if m.is_empty() {
     return Err("no motds".into());
   }
 
@@ -48,8 +48,8 @@ pub fn parse(g: types::Gods, m: types::Motds) -> Result<Model, Box<Error>> {
     while let Some(index) = s.find("<li>") {
       if let Some(index2) = s.find("</li>") {
         let parts = s[index + 4..index2]
-          .splitn(2, ":")
-          .map(|s| s.trim())
+          .splitn(2, ':')
+          .map(str::trim)
           .collect::<Vec<&str>>();
         s = &s[index2 + 5..];
         if parts.len() == 2 {
@@ -108,11 +108,11 @@ pub fn parse(g: types::Gods, m: types::Motds) -> Result<Model, Box<Error>> {
   Ok(Model {
     game_mode: m.game_mode.clone().unwrap_or_else(|| "".to_string()),
     title: m.title.clone().unwrap_or_else(|| "".to_string()),
-    attributes: attributes,
-    description: description,
-    gods: gods,
-    team1_gods: team1_gods,
-    team2_gods: team2_gods,
-    team1and2_gods: team1and2_gods,
+    attributes,
+    description,
+    gods,
+    team1_gods,
+    team2_gods,
+    team1and2_gods,
   })
 }
