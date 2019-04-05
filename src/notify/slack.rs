@@ -38,9 +38,7 @@ pub struct Slack {
 
 impl Slack {
   pub fn new(opts: SlackOpts) -> Self {
-    Self {
-      opts,
-    }
+    Self { opts }
   }
 }
 
@@ -69,9 +67,7 @@ impl super::Notify for Slack {
 
     if !m.team1and2_gods.is_empty() {
       let mut iter = m.team1and2_gods.iter();
-      let v = iter
-        .by_ref()
-        .map(|id| m.gods.get(&id).unwrap().name.clone());
+      let v = iter.by_ref().map(|&id| m.get_god_name(id));
       fields.push(Field {
         title: "Team 1 and 2".into(),
         value: v.collect::<Vec<_>>().join(", "),
@@ -81,9 +77,7 @@ impl super::Notify for Slack {
 
     if !m.team1_gods.is_empty() {
       let mut iter = m.team1_gods.iter();
-      let v = iter
-        .by_ref()
-        .map(|id| m.gods.get(&id).unwrap().name.clone());
+      let v = iter.by_ref().map(|&id| m.get_god_name(id));
       fields.push(Field {
         title: "Team 1 only".into(),
         value: v.collect::<Vec<_>>().join(", "),
@@ -93,9 +87,7 @@ impl super::Notify for Slack {
 
     if !m.team2_gods.is_empty() {
       let mut iter = m.team2_gods.iter();
-      let v = iter
-        .by_ref()
-        .map(|id| m.gods.get(&id).unwrap().name.clone());
+      let v = iter.by_ref().map(|&id| m.get_god_name(id));
       fields.push(Field {
         title: "Team 2 only".into(),
         value: v.collect::<Vec<_>>().join(", "),
