@@ -1,9 +1,12 @@
+#[macro_use]
+extern crate log;
+
 use std::error::Error;
 use std::fs;
 
 use clap::{crate_authors, crate_description, crate_name, crate_version, App, AppSettings, Arg};
 use dirs;
-use env_logger;
+use pretty_env_logger;
 
 mod api;
 mod model;
@@ -19,7 +22,7 @@ macro_rules! arg_env {
     let mut arg = $arg.env($str);
     #[cfg(feature = "compile_env")]
     {
-      if let Some(v) = option_env!($str) { 
+      if let Some(v) = option_env!($str) {
         arg = arg.default_value(v);
       }
     }
@@ -27,12 +30,8 @@ macro_rules! arg_env {
   }};
 }
 
-// fn arg_env<A: Into<Arg<'a, 'b>>>(mut arg: A, env: &str) -> Arg<'a, 'b> {
-
-// }
-
 fn main() -> Result<(), Box<Error>> {
-  env_logger::init();
+  pretty_env_logger::init();
 
   let matches = App::new(crate_name!())
     .setting(AppSettings::ColoredHelp)
@@ -181,10 +180,7 @@ Extra:"#,
     ))
     .get_matches();
 
-  // println!("{:#?}", matches);
-
-  // let t = suboptions!(matches.value_of("notify-pushbullet").unwrap(), notify::pushbullet::PushbulletOpts);
-  // println!("{:#?}", t);
+  trace!("Initialized");
 
   let mut notifies: Vec<Box<notify::Notify>> = vec![];
 
@@ -245,6 +241,7 @@ Extra:"#,
     matches.value_of("auth-key").unwrap(),
     Box::new(store::pickledb::PickleDb::new(app_config_path)),
   );
+
   let gods = smite.get_gods()?;
   let motds = smite.get_motd()?;
 

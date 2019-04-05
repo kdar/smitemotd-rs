@@ -6,8 +6,8 @@ use reqwest;
 use serde::de::DeserializeOwned;
 use serde_json::Value;
 
-use crate::types;
 use crate::store;
+use crate::types;
 
 const BASE_URL: &str = "http://api.smitegame.com/smiteapi.svc";
 const INVALID_SESSION: &str = "Invalid session id.";
@@ -45,8 +45,12 @@ impl Smite {
     format!("{:x}", result)
   }
 
-  fn api_call<T: DeserializeOwned>(&mut self, method: &str, params: &[&str]) -> Result<T, Box<Error>> {
-    self.create_session(false)?;    
+  fn api_call<T: DeserializeOwned>(
+    &mut self,
+    method: &str,
+    params: &[&str],
+  ) -> Result<T, Box<Error>> {
+    self.create_session(false)?;
 
     let resp = loop {
       let ts = self.timestamp();
@@ -65,10 +69,7 @@ impl Smite {
         url = format!("{}/{}", url, params.join("/"));
       }
 
-      let resp: Value = reqwest::Client::new()
-        .get(&url)
-        .send()?
-        .json()?;
+      let resp: Value = reqwest::Client::new().get(&url).send()?.json()?;
 
       if let Value::Array(v) = &resp {
         if v.len() == 1 {
@@ -120,12 +121,16 @@ impl Smite {
   }
 
   pub fn get_motd(&mut self) -> Result<types::Motds, Box<Error>> {
+    trace!("Fetching motds...");
     let res = self.api_call("getmotd", &[])?;
+    trace!("get_motd() -> {:#?}", res);
     Ok(res)
   }
 
   pub fn get_gods(&mut self) -> Result<types::Gods, Box<Error>> {
+    trace!("Fetching gods...");
     let res = self.api_call("getgods", &["1"])?;
+    trace!("get_gods() -> {:?}", res);
     Ok(res)
   }
 }
