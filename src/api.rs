@@ -65,7 +65,7 @@ impl Smite {
         timestamp = ts,
       );
 
-      if params.len() > 0 {
+      if !params.is_empty() {
         url = format!("{}/{}", url, params.join("/"));
       }
 
