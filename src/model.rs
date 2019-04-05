@@ -15,6 +15,15 @@ pub struct Model {
   pub team1and2_gods: Vec<i64>,
 }
 
+impl Model {
+  pub fn get_god_name(&self, id: i64) -> String {
+    match self.gods.get(&id) {
+      Some(v) => v.name.clone(),
+      None => format!("{}", id),
+    }
+  }
+}
+
 pub fn parse(g: types::Gods, m: types::Motds) -> Result<Model, Box<Error>> {
   if m.len() == 0 {
     return Err("no motds".into());
