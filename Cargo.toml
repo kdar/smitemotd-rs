@@ -28,3 +28,7 @@ denv = "0.2.0"
 [features]
 default = []
 compile_env = []
+
+[[bin]]
+name = "smitemotd"
+path = "src/main.rs"
