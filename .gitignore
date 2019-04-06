@@ -3,3 +3,5 @@
 /.env
 /smitemotd.db
 /.doc
+/deploy.bash
+/smitemotd.tar
