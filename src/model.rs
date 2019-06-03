@@ -1,9 +1,11 @@
 use std::collections::HashMap;
 use std::error::Error;
 
+use serde_derive::{Deserialize, Serialize};
+
 use crate::types;
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Serialize, Deserialize)]
 pub struct Model {
   pub game_mode: String,
   pub title: String,
