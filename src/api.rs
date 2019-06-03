@@ -6,7 +6,7 @@ use reqwest;
 use serde::de::DeserializeOwned;
 use serde_json::Value;
 
-use crate::store;
+use super::Store;
 use crate::types;
 
 const BASE_URL: &str = "http://api.smitegame.com/smiteapi.svc";
@@ -16,11 +16,11 @@ pub struct Smite {
   dev_id: String,
   auth_key: String,
   session_id: Option<String>,
-  store: Box<store::Store>,
+  store: Box<Store<Error = Box<Error>>>,
 }
 
 impl Smite {
-  pub fn new(dev_id: &str, auth_key: &str, store: Box<store::Store>) -> Smite {
+  pub fn new(dev_id: &str, auth_key: &str, store: Box<Store<Error = Box<Error>>>) -> Smite {
     Smite {
       dev_id: dev_id.to_string(),
       auth_key: auth_key.to_string(),

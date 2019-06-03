@@ -6,7 +6,7 @@ use serde_derive::Deserialize;
 use uuid::Uuid;
 
 use super::fmt;
-use crate::model::Model;
+use smitemotd::Model;
 
 #[derive(Deserialize, Debug)]
 pub struct EmailOpts {

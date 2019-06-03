@@ -5,8 +5,8 @@ use std::io::{self, Write};
 
 use serde_derive::Deserialize;
 
-use crate::model::Model;
 use super::fmt;
+use smitemotd::Model;
 
 #[derive(Deserialize, Debug, Default)]
 pub struct StreamOpts {
@@ -43,8 +43,8 @@ impl super::Notify for Stream {
     if let Some(true) = self.opts.color {
       let s = fmt::format(m, self.opts.color.unwrap_or(false));
       w.write_all(s.as_bytes())?;
-      // w.write(b"\n")?;
-    } else {      
+    // w.write(b"\n")?;
+    } else {
       w.write_all(fmt::format(&m, false).as_bytes())?;
       // w.write(b"\n")?;
     }

@@ -3,8 +3,8 @@ use std::error::Error;
 use reqwest;
 use serde_derive::Deserialize;
 
-use crate::model::Model;
 use super::fmt;
+use smitemotd::Model;
 
 #[derive(Deserialize, Debug)]
 pub struct PushedOpts {
@@ -18,9 +18,7 @@ pub struct Pushed {
 
 impl Pushed {
   pub fn new(opts: PushedOpts) -> Self {
-    Self {
-      opts,
-    }
+    Self { opts }
   }
 }
 
@@ -32,10 +30,7 @@ impl super::Notify for Pushed {
         ("app_key", self.opts.key.clone()),
         ("app_secret", self.opts.secret.clone()),
         ("target_type", "app".to_string()),
-        (
-          "content",
-          fmt::format(&m, false),
-        ),
+        ("content", fmt::format(&m, false)),
       ])
       .send()?;
 

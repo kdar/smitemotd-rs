@@ -3,7 +3,7 @@ use std::error::Error;
 use reqwest;
 use serde_derive::{Deserialize, Serialize};
 
-use crate::model::Model;
+use smitemotd::Model;
 
 #[derive(Debug, Serialize, Deserialize, Default)]
 struct Payload {

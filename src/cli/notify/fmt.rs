@@ -1,6 +1,6 @@
 use yansi::{Color, Style};
 
-use crate::model::Model;
+use smitemotd::Model;
 
 pub fn format(m: &Model, color: bool) -> String {
   let (key_style, title_style) = if color {
@@ -24,7 +24,11 @@ pub fn format(m: &Model, color: bool) -> String {
   s.push_str("\n");
   s.push_str(&m.description);
   s.push_str("\n\n");
-  s.push_str(&format!("{}: {}", key_style.paint("Game mode"), m.game_mode));
+  s.push_str(&format!(
+    "{}: {}",
+    key_style.paint("Game mode"),
+    m.game_mode
+  ));
 
   for attr in &m.attributes {
     s.push_str("\n");

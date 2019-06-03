@@ -8,13 +8,12 @@ use clap::{crate_authors, crate_description, crate_name, crate_version, App, App
 use dirs;
 use pretty_env_logger;
 
-mod api;
-mod model;
+use smitemotd::{Model, Smite};
+
 mod notify;
-mod types;
 #[macro_use]
 mod macros;
-mod store;
+mod pickledb;
 
 macro_rules! arg_env {
   ($arg:expr, $str:expr) => {
@@ -239,10 +238,10 @@ Extra:"#,
 
   fs::create_dir_all(&app_config_path)?;
 
-  let mut smite = api::Smite::new(
+  let mut smite = Smite::new(
     matches.value_of("dev-id").unwrap(),
     matches.value_of("auth-key").unwrap(),
-    Box::new(store::pickledb::PickleDb::new(app_config_path)),
+    Box::new(pickledb::PickleDb::new(app_config_path)),
   );
 
   let gods = smite.get_gods()?;
@@ -275,7 +274,7 @@ Extra:"#,
 
   // let motds: types::Motds = serde_json::from_str(motds)?;
 
-  let model = model::parse(gods, motds)?;
+  let model = Model::parse(gods, motds)?;
   for n in notifies {
     if let Err(e) = n.notify(&model) {
       eprintln!("Error: {}", e);

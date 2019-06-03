@@ -29,6 +29,10 @@ denv = "0.2.0"
 default = []
 compile_env = []
 
-[[bin]]
+[lib]
 name = "smitemotd"
-path = "src/main.rs"
+path = "src/lib.rs"
+
+[[bin]]
+name = "smitemotd-cli"
+path = "src/cli/main.rs"

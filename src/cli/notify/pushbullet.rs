@@ -1,11 +1,11 @@
 use std::error::Error;
 
 use reqwest;
-use serde_json::json;
 use serde_derive::Deserialize;
+use serde_json::json;
 
-use crate::model::Model;
 use super::fmt;
+use smitemotd::Model;
 
 #[derive(Deserialize, Debug)]
 pub struct PushbulletOpts {
@@ -19,9 +19,7 @@ pub struct Pushbullet {
 
 impl Pushbullet {
   pub fn new(opts: PushbulletOpts) -> Self {
-    Self {
-      opts,
-    }
+    Self { opts }
   }
 }
 
