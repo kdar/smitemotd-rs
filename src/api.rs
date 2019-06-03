@@ -12,15 +12,15 @@ use crate::types;
 const BASE_URL: &str = "http://api.smitegame.com/smiteapi.svc";
 const INVALID_SESSION: &str = "Invalid session id.";
 
-pub struct Smite {
+pub struct Smite<S> {
   dev_id: String,
   auth_key: String,
   session_id: Option<String>,
-  store: Box<Store<Error = Box<Error>>>,
+  store: S,
 }
 
-impl Smite {
-  pub fn new(dev_id: &str, auth_key: &str, store: Box<Store<Error = Box<Error>>>) -> Smite {
+impl<S: Store<Error = Box<Error>>> Smite<S> {
+  pub fn new(dev_id: &str, auth_key: &str, store: S) -> Self {
     Smite {
       dev_id: dev_id.to_string(),
       auth_key: auth_key.to_string(),
