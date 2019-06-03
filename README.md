@@ -1,14 +1,13 @@
-smitemotd
-=========
+# smitemotd
 
-Tool to retrieve the latest Smite MOTD (Match of the Day). It can either print this to console or to various other places like notification services or email.
+Tool and library to retrieve the latest Smite MOTD (Match of the Day). The cli can either print this to console or to various other places like notification services or email.
 
 ## Features
 
-* Single executable with no external dependencies (other than common dynamically linked libraries).
-* Output to console with color (ANSI) support.
-* Works on linux and *should* work on OSX and Windows.
-* Can notify via email, pushbullet, pushed.co, and slack.
+- Single executable with no external dependencies (other than common dynamically linked libraries).
+- Output to console with color (ANSI) support.
+- Works on linux and _should_ work on OSX and Windows.
+- Can notify via email, pushbullet, pushed.co, and slack.
 
 ## Developer registration
 
