@@ -91,7 +91,7 @@ impl Smite {
 
   pub fn create_session(&mut self, force: bool) -> Result<(), Box<Error>> {
     if !force {
-      if let Ok(Some(val)) = self.store.get_session_id() {
+      if let Ok(Some(val)) = self.store.load_session_id() {
         self.session_id = Some(val);
         return Ok(());
       }
@@ -113,7 +113,7 @@ impl Smite {
 
     self
       .store
-      .set_session_id(&session.session_id)
+      .save_session_id(&session.session_id)
       .map_err(|e| format!("{}", e))?;
     self.session_id = Some(session.session_id);
 

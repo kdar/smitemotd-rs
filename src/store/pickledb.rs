@@ -30,7 +30,7 @@ impl PickleDb {
 }
 
 impl super::Store for PickleDb {
-  fn set_session_id(&mut self, sid: &str) -> Result<(), Box<Error>> {
+  fn save_session_id(&mut self, sid: &str) -> Result<(), Box<Error>> {
     self
       .db
       .set("session_id", &sid)
@@ -39,7 +39,7 @@ impl super::Store for PickleDb {
     Ok(())
   }
 
-  fn get_session_id(&self) -> Result<Option<String>, Box<Error>> {
+  fn load_session_id(&self) -> Result<Option<String>, Box<Error>> {
    let v = self.db.get::<String>("session_id");
    Ok(v)
   }
