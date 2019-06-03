@@ -11,5 +11,5 @@ pub use model::Model;
 pub trait Store {
   type Error;
   fn save_session_id(&mut self, sid: &str) -> Result<(), Self::Error>;
-  fn load_session_id(&self) -> Result<Option<String>, Self::Error>;
+  fn load_session_id(&mut self) -> Result<Option<String>, Self::Error>;
 }
