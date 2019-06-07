@@ -241,7 +241,7 @@ Extra:"#,
   let mut smite = Smite::new(
     matches.value_of("dev-id").unwrap(),
     matches.value_of("auth-key").unwrap(),
-    Box::new(pickledb::PickleDb::new(app_config_path)),
+    pickledb::PickleDb::new(app_config_path),
   );
 
   let gods = smite.get_gods()?;
