@@ -6,3 +6,4 @@
 /deploy.bash
 /smitemotd.tar
 /.cargo
+.envrc
