@@ -24,38 +24,27 @@ impl Model {
     }
 
     let m = &m[0];
+    let s = m.description.as_ref().unwrap().as_str();
 
-    let mut description = String::new();
-    let mut attributes = vec![];
+    // This may seem like a weird way of parsing the attributes, but the API
+    // will sometimes return attributes with missing </li>. Because of this,
+    // we only care about the start of each <li> since there are no nested
+    // html elements returned.
+    let mut attrs = s
+      .split("<li>")
+      .map(|v| v.replace("</li>", "").trim().to_string());
+    let description = attrs.next().unwrap();
 
-    let mut s = m.description.as_ref().unwrap().as_str();
-    // Sometimes descriptions start with <li>. Not sure why, but
-    // we just strip it.
-    if s.starts_with("<li>") {
-      s = &s[4..s.len() - 4];
-    }
-
-    if let Some(index) = s.find("<li>") {
-      description.push_str(&s[0..index].trim());
-      s = &s[index..];
-
-      while let Some(index) = s.find("<li>") {
-        if let Some(index2) = s.find("</li>") {
-          let parts = s[index + 4..index2]
-            .splitn(2, ':')
-            .map(str::trim)
-            .collect::<Vec<&str>>();
-          s = &s[index2 + 5..];
-          if parts.len() == 2 {
-            attributes.push((parts[0].to_string(), Some(parts[1].to_string())));
-          } else {
-            attributes.push((parts[0].to_string(), None));
-          }
+    let attributes = attrs
+      .map(|v| {
+        let parts = v.splitn(2, ':').map(str::trim).collect::<Vec<&str>>();
+        if parts.len() == 2 {
+          (parts[0].to_string(), Some(parts[1].to_string()))
+        } else {
+          (parts[0].to_string(), None)
         }
-      }
-    } else {
-      description.push_str(s.trim());
-    }
+      })
+      .collect();
 
     let mut gods = HashMap::new();
     for god in g {
