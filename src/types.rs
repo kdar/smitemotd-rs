@@ -1,5 +1,12 @@
 use serde_derive::{Deserialize, Serialize};
 
+#[derive(Serialize, Deserialize)]
+pub struct Error {
+  ret_msg: String,
+  session_id: String,
+  timestamp: String,
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Session {
   pub timestamp: String,

@@ -74,9 +74,14 @@ impl<S: Store<Error = Box<Error>>> Smite<S> {
       if let Value::Array(v) = &resp {
         if v.len() == 1 {
           if let Value::Object(m) = &v[0] {
-            if m.get("ret_msg") == Some(&Value::String(INVALID_SESSION.to_string())) {
-              self.create_session(true)?;
-              continue;
+            let ret_msg = m.get("ret_msg");
+            if let Some(ret_msg) = ret_msg {
+              if ret_msg == &Value::String(INVALID_SESSION.to_string()) {
+                self.create_session(true)?;
+                continue;
+              } else {
+                return Err(format!("error: {}", ret_msg).into());
+              }
             }
           }
         }
