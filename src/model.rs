@@ -18,7 +18,7 @@ pub struct Model {
 }
 
 impl Model {
-  pub fn parse(g: types::Gods, m: types::Motds) -> Result<Model, Box<Error>> {
+  pub fn parse(g: types::Gods, m: types::Motds) -> Result<Model, Box<dyn Error>> {
     if m.is_empty() {
       return Err("no motds".into());
     }

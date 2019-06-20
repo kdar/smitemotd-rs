@@ -19,7 +19,7 @@ pub struct Smite<S> {
   store: S,
 }
 
-impl<S: Store<Error = Box<Error>>> Smite<S> {
+impl<S: Store<Error = Box<dyn Error>>> Smite<S> {
   pub fn new(dev_id: &str, auth_key: &str, store: S) -> Self {
     Smite {
       dev_id: dev_id.to_string(),
@@ -49,7 +49,7 @@ impl<S: Store<Error = Box<Error>>> Smite<S> {
     &mut self,
     method: &str,
     params: &[&str],
-  ) -> Result<T, Box<Error>> {
+  ) -> Result<T, Box<dyn Error>> {
     self.create_session(false)?;
 
     let resp = loop {
@@ -94,7 +94,7 @@ impl<S: Store<Error = Box<Error>>> Smite<S> {
     Ok(resp)
   }
 
-  pub fn create_session(&mut self, force: bool) -> Result<(), Box<Error>> {
+  pub fn create_session(&mut self, force: bool) -> Result<(), Box<dyn Error>> {
     if !force {
       if let Ok(Some(val)) = self.store.load_session_id() {
         self.session_id = Some(val);
@@ -125,14 +125,14 @@ impl<S: Store<Error = Box<Error>>> Smite<S> {
     Ok(())
   }
 
-  pub fn get_motd(&mut self) -> Result<types::Motds, Box<Error>> {
+  pub fn get_motd(&mut self) -> Result<types::Motds, Box<dyn Error>> {
     trace!("Fetching motds...");
     let res = self.api_call("getmotd", &[])?;
     trace!("get_motd() -> {:#?}", res);
     Ok(res)
   }
 
-  pub fn get_gods(&mut self) -> Result<types::Gods, Box<Error>> {
+  pub fn get_gods(&mut self) -> Result<types::Gods, Box<dyn Error>> {
     trace!("Fetching gods...");
     let res = self.api_call("getgods", &["1"])?;
     trace!("get_gods() -> {:?}", res);
