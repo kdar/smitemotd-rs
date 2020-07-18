@@ -2,7 +2,7 @@ use std::error::Error;
 
 use chrono::{DateTime, Utc};
 use md5::{Digest, Md5};
-use reqwest;
+use reqwest::blocking as reqwest;
 use serde::de::DeserializeOwned;
 use serde_json::Value;
 
@@ -36,11 +36,11 @@ impl<S: Store<Error = Box<dyn Error>>> Smite<S> {
 
   fn signature(&self, method: &str, timestamp: &str) -> String {
     let mut hasher = Md5::new();
-    hasher.input(&self.dev_id);
-    hasher.input(method);
-    hasher.input(&self.auth_key);
-    hasher.input(timestamp);
-    let result = hasher.result();
+    hasher.update(&self.dev_id);
+    hasher.update(method);
+    hasher.update(&self.auth_key);
+    hasher.update(timestamp);
+    let result = hasher.finalize();
 
     format!("{:x}", result)
   }
@@ -49,7 +49,7 @@ impl<S: Store<Error = Box<dyn Error>>> Smite<S> {
     &mut self,
     method: &str,
     params: &[&str],
-  ) -> Result<T, Box<dyn Error>> {
+  ) -> Result<T, crate::Error> {
     self.create_session(false)?;
 
     let resp = loop {
@@ -94,7 +94,7 @@ impl<S: Store<Error = Box<dyn Error>>> Smite<S> {
     Ok(resp)
   }
 
-  pub fn create_session(&mut self, force: bool) -> Result<(), Box<dyn Error>> {
+  pub fn create_session(&mut self, force: bool) -> Result<(), crate::Error> {
     if !force {
       if let Ok(Some(val)) = self.store.load_session_id() {
         self.session_id = Some(val);
@@ -125,14 +125,14 @@ impl<S: Store<Error = Box<dyn Error>>> Smite<S> {
     Ok(())
   }
 
-  pub fn get_motd(&mut self) -> Result<types::Motds, Box<dyn Error>> {
+  pub fn get_motd(&mut self) -> Result<types::Motds, crate::Error> {
     trace!("Fetching motds...");
     let res = self.api_call("getmotd", &[])?;
     trace!("get_motd() -> {:#?}", res);
     Ok(res)
   }
 
-  pub fn get_gods(&mut self) -> Result<types::Gods, Box<dyn Error>> {
+  pub fn get_gods(&mut self) -> Result<types::Gods, crate::Error> {
     trace!("Fetching gods...");
     let res = self.api_call("getgods", &["1"])?;
     trace!("get_gods() -> {:?}", res);
