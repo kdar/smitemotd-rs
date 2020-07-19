@@ -1,8 +1,7 @@
 use std::collections::HashMap;
-use std::error::Error;
 
 use chrono::{DateTime, Utc};
-use serde_derive::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 
 use crate::types;
 
@@ -19,13 +18,13 @@ pub struct Motd {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Model {
+pub struct MotdModel {
   pub motds: Vec<Motd>,
   pub gods: HashMap<i64, types::God>,
 }
 
-impl Model {
-  pub fn parse(gods: types::Gods, motds: types::Motds) -> Result<Model, crate::Error> {
+impl MotdModel {
+  pub fn parse(gods: types::Gods, motds: types::Motds) -> Result<MotdModel, crate::Error> {
     if motds.is_empty() {
       return Err("no motds".into());
     }
@@ -108,7 +107,7 @@ impl Model {
       });
     }
 
-    Ok(Model {
+    Ok(MotdModel {
       motds: motds_res,
       gods: gods_res,
     })

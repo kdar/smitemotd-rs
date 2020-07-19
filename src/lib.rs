@@ -4,11 +4,10 @@ extern crate log;
 use std::error::Error as StdError;
 
 mod api;
-mod model;
-mod types;
+pub mod model;
+pub mod types;
 
 pub use api::Smite;
-pub use model::Model;
 
 pub type Error = Box<dyn StdError + Send + Sync>;
 
