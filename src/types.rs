@@ -1,6 +1,20 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
+#[derive(Copy, Clone)]
+pub enum Language {
+  English = 1,
+  German = 2,
+  French = 3,
+  Chinese = 5,
+  Spanish = 7,
+  Spanishla = 9,
+  Portuguese = 10,
+  Russian = 11,
+  Polish = 12,
+  Turkish = 13,
+}
+
 #[derive(Serialize, Deserialize)]
 pub struct Error {
   ret_msg: String,

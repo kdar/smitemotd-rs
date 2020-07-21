@@ -12,7 +12,6 @@ pub use api::Smite;
 pub type Error = Box<dyn StdError + Send + Sync>;
 
 pub trait Store {
-  type Error;
-  fn save_session_id(&mut self, sid: &str) -> Result<(), Self::Error>;
-  fn load_session_id(&mut self) -> Result<Option<String>, Self::Error>;
+  fn save_session_id(&mut self, sid: &str) -> Result<(), Error>;
+  fn load_session_id(&mut self) -> Result<Option<String>, Error>;
 }

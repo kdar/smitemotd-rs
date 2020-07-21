@@ -17,15 +17,17 @@ pub struct Smite<S> {
   auth_key: String,
   session_id: Option<String>,
   store: S,
+  language: types::Language,
 }
 
-impl<S: Store<Error = Box<dyn Error>>> Smite<S> {
+impl<S: Store> Smite<S> {
   pub fn new(dev_id: &str, auth_key: &str, store: S) -> Self {
     Smite {
       dev_id: dev_id.to_string(),
       auth_key: auth_key.to_string(),
       store,
       session_id: None,
+      language: types::Language::English,
     }
   }
 
@@ -96,9 +98,12 @@ impl<S: Store<Error = Box<dyn Error>>> Smite<S> {
 
   pub fn create_session(&mut self, force: bool) -> Result<(), crate::Error> {
     if !force {
-      if let Ok(Some(val)) = self.store.load_session_id() {
-        self.session_id = Some(val);
-        return Ok(());
+      let val = self.store.load_session_id()?;
+      if let Some(val) = val {
+        if val.len() > 0 {
+          self.session_id = Some(val);
+          return Ok(());
+        }
       }
     }
 
@@ -114,7 +119,8 @@ impl<S: Store<Error = Box<dyn Error>>> Smite<S> {
       timestamp = ts,
     );
 
-    let session: types::Session = reqwest::Client::new().get(&url).send()?.json()?;
+    let req = reqwest::Client::new().get(&url).send()?;
+    let session: types::Session = req.json()?;
 
     self
       .store
@@ -134,7 +140,7 @@ impl<S: Store<Error = Box<dyn Error>>> Smite<S> {
 
   pub fn get_gods(&mut self) -> Result<types::Gods, crate::Error> {
     trace!("Fetching gods...");
-    let res = self.api_call("getgods", &["1"])?;
+    let res = self.api_call("getgods", &[&format!("{}", self.language as u32)])?;
     trace!("get_gods() -> {:?}", res);
     Ok(res)
   }
