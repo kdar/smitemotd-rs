@@ -38,25 +38,7 @@ impl MotdModel {
     for m in motds {
       let s = m.description.as_ref().unwrap().as_str();
 
-      // This may seem like a weird way of parsing the attributes, but the API
-      // will sometimes return attributes with missing </li>. Because of this,
-      // we only care about the start of each <li> since there are no nested
-      // html elements returned.
-      let mut attrs = s
-        .split("<li>")
-        .map(|v| v.replace("</li>", "").trim().to_string());
-      let description = attrs.next().unwrap();
-
-      let attributes = attrs
-        .map(|v| {
-          let parts = v.splitn(2, ':').map(str::trim).collect::<Vec<&str>>();
-          if parts.len() == 2 {
-            (parts[0].to_string(), Some(parts[1].to_string()))
-          } else {
-            (parts[0].to_string(), None)
-          }
-        })
-        .collect();
+      let (description, attributes) = parse_description(s);
 
       let mut team1and2_gods = vec![];
       let mut team1_gods: Vec<_> = m
@@ -118,5 +100,76 @@ impl MotdModel {
       Some(v) => v.name.clone(),
       None => format!("{}", id),
     }
+  }
+}
+
+fn parse_description(s: &str) -> (String, Vec<(String, Option<String>)>) {
+  // This may seem like a weird way of parsing the attributes, but the API
+  // will sometimes return attributes with missing </li>. Because of this,
+  // we only care about the start of each <li> since there are no nested
+  // html elements returned.
+  let mut attrs = s
+    .split("<li>")
+    .map(|v| v.replace("</li>", "").trim().to_string());
+  let mut description = attrs.next().unwrap();
+  if description.is_empty() {
+    description = attrs.next().unwrap();
+  }
+
+  let attributes = attrs
+    .map(|v| {
+      let parts = v.splitn(2, ':').map(str::trim).collect::<Vec<&str>>();
+      if parts.len() == 2 {
+        (parts[0].to_string(), Some(parts[1].to_string()))
+      } else {
+        (parts[0].to_string(), None)
+      }
+    })
+    .collect();
+
+  return (description, attributes);
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  macro_rules! parse_description_tests {
+    ($($name:ident: $value:expr,)*) => {
+      $(
+        #[test]
+        fn $name() {
+          let (input, expected) = $value;
+          let mut v = vec![];
+          for (key, value) in expected.1 as Vec<(&str, Option<&str>)> {
+            v.push((key.to_string(), value.map(|x| x.to_string())));
+          }
+          assert_eq!((expected.0.to_string(), v), parse_description(input));
+        }
+      )*
+    }
+  }
+
+  parse_description_tests! {
+    parse_description_nested_valid_html: (
+      "<li>hey<li>A: B</li><li>C:D</li></li>",
+      ("hey", vec![("A", Some("B")), ("C", Some("D"))]),
+    ),
+    parse_description_missing_outer_li: (
+      "hey<li>A: B</li><li>C: D</li>",
+      ("hey", vec![("A", Some("B")), ("C", Some("D"))]),
+    ),
+    parse_description_missing_start_li: (
+      "hey<li>A: B</li><li>C: D</li></li>",
+      ("hey", vec![("A", Some("B")), ("C", Some("D"))]),
+    ),
+    parse_description_no_html: (
+      "hey",
+      ("hey", vec![]),
+    ),
+    parse_description_no_attr_value: (
+      "hey<li>A</li><li>C</li></li>",
+      ("hey", vec![("A", None), ("C", None)]),
+    ),
   }
 }
