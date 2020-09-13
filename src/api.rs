@@ -1,5 +1,3 @@
-use std::error::Error;
-
 use chrono::{DateTime, Utc};
 use md5::{Digest, Md5};
 use reqwest::blocking as reqwest;
